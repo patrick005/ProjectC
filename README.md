@@ -30,12 +30,12 @@ ProjectC
 
 
  ### 테이블의 속성 
-| CalumName | Type            | uniqueable | NULLable |  
-|-----------|-----------------|------------|----------|  
-| name      | varchar(50)     |            | NOT NULL |  
-|UserId     | varchar(50)     | UNIQUE     | NOT NULL |  
-|password   | varchar(255)    |            | NOT NULL |  
-|Email      | varchar(255)    | UNIQUE     | NOT NULL |  
-|-- etc     |        -        |   -        |  -       |  
+| CalumName | Type     | Size | UNIQUEable | NULLable |  
+|-----------|----------|------|------------|----------|  
+| name      | varchar  | 50   |            | NOT NULL |  
+|UserId     | varchar  | 50   | UNIQUE     | NOT NULL |  
+|password   | varchar  | 255  |            | NOT NULL |  
+|Email      | varchar  | 255  | UNIQUE     | NOT NULL |  
+|   etc     |       -  | -    |   -        |  -       |  
 
 
