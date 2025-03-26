@@ -5,7 +5,7 @@
 // string.h 및 util/delay.h 와 같이 불필요한 부분 주석처리
 // PIR 로직 부분 Low인 줄 알았으나 High여서 해당 사항에 맞게 수정 및 기존 코드 주석처리
 
-#define F_CPU 16000000UL
+// #define F_CPU 16000000UL
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdio.h>
