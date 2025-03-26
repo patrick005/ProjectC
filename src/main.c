@@ -1,77 +1,107 @@
-#include <avr/io.h>
-#include <util/delay.h>
+#include "lcd.h"
+#include "uart0.h"
 #include <avr/interrupt.h>
+#include <avr/io.h>
+#include <stdio.h>
+#include <util/delay.h>
 
-#define LIGHT_THRESHOLD 400      // 조도 기준값
-#define OPEN_STEPS 3000          // 블라인드가 완전히 열리는 데 필요한 스텝 수
-#define CLOSE_STEPS 3000         // 블라인드가 완전히 닫히는 데 필요한 스텝 수
-#define STEP_DELAY_MS 1
+uint8_t cursor = 0;
 
-#define IN1 PC0
-#define IN2 PC1
-#define IN3 PC2
-#define IN4 PC3
+volatile uint8_t hours = 0, minutes = 0, seconds = 0;
 
-// 블라인드 상태 정의
-enum BlindState { OPEN, CLOSED };
-enum BlindState blind_state = CLOSED;
+// ✅ Added line buffers
+char weatherStr[17] = "                ";
+char timeStr[17]    = "                ";
 
-uint16_t adc_result = 0;
-uint8_t motor_step = 0;
-int motor_direction = 1; // 1: 정방향, -1: 역방향
+void timer1Init()
+{
+    // Set CTC mode (Clear Timer on Compare Match)
+    TCCR1B |= (1 << WGM12);
 
-const uint8_t step_sequence[8] = {
-  0b00001000, // IN4
-  0b00001100, // IN3 + IN4
-  0b00000100, // IN3
-  0b00000110, // IN2 + IN3
-  0b00000010, // IN2
-  0b00000011, // IN1 + IN2
-  0b00000001, // IN1
-  0b00001001  // IN1 + IN4
-};
+    // Prescaler = 1024
+    TCCR1B |= (1 << CS12) | (1 << CS10);
 
-void initADC() {
-  ADMUX = (1 << REFS0); // AVCC 기준 전압, ADC0 사용
-  ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1); // ADC 인에이블, 프리스케일러 64
+    // Compare match value for 1s interrupt at 16MHz with /1024 prescaler:
+    OCR1A = 15624;
+
+    // Enable Timer1 Compare Match A Interrupt
+    TIMSK |= (1 << OCIE1A);
 }
 
-uint16_t readADC(uint8_t channel) {
-  ADMUX = (ADMUX & 0xF0) | (channel & 0x0F);
-  ADCSRA |= (1 << ADSC); // 변환 시작
-  while (ADCSRA & (1 << ADSC)); // 변환 완료 대기
-  return ADC;
-}
+int main()
+{
+    uart0Init(); // UART 초기화
+    lcdInit();   // LCD 초기화
+    timer1Init(); // 타이머 초기화
+    sei();       // 전역 인터럽트 허용
 
-void initMotorPins() {
-  DDRC |= 0x0F; // PC0~PC3 출력 설정
-}
+    stdin = &INPUT;   // UART 입력 설정
+    stdout = &OUTPUT; // UART 출력 설정
 
-void stepMotor(int direction, int steps, int speed_ms) {
-  for (int i = 0; i < steps; i++) {
-    motor_step = (motor_step + direction + 8) % 8;
-    PORTC = (PORTC & 0xF0) | (step_sequence[motor_step] & 0x0F);
-    _delay_ms(speed_ms);
-  }
-}
+    DDRE = 0x02; // Rx(입력), TX(출력)1, SW0~3 입력
 
-int main(void) {
-  initADC();
-  initMotorPins();
+    char cData;
 
-  while (1) {
-    adc_result = readADC(0); // PF0 (ADC0) 조도센서 입력
+    // 초기 LCD 상태 설정
+    lcdGotoXY(0, 0);
+    lcdPrint(weatherStr);
+    lcdGotoXY(0, 1);
+    lcdPrint(timeStr);
 
-    if (adc_result > LIGHT_THRESHOLD && blind_state == CLOSED) {
-      // 밝고 현재 닫힌 상태 → 블라인드 열기
-      stepMotor(1, OPEN_STEPS, STEP_DELAY_MS);
-      blind_state = OPEN;
-    } else if (adc_result <= LIGHT_THRESHOLD && blind_state == OPEN) {
-      // 어둡고 현재 열린 상태 → 블라인드 닫기
-      stepMotor(-1, CLOSE_STEPS, STEP_DELAY_MS);
-      blind_state = CLOSED;
+    while (1)
+    {
+        // UART 데이터 수신 확인
+        if (UCSR0A & (1 << RXC0))
+        {
+            cData = fgetc(stdin); // UART로부터 문자 읽기
+
+            // ✅ Only modify weatherStr, not timeStr
+            switch (cData)
+            {
+                case '1':
+                    snprintf(weatherStr, sizeof(weatherStr), "SUNNY         ");
+                    break;
+                case '2':
+                    snprintf(weatherStr, sizeof(weatherStr), "CLOUDY        ");
+                    break;
+                case '3':
+                    snprintf(weatherStr, sizeof(weatherStr), "RAINY         ");
+                    break;
+                case '4':
+                    snprintf(weatherStr, sizeof(weatherStr), "SNOWY         ");
+                    break;
+                default:
+                    snprintf(weatherStr, sizeof(weatherStr), "Invalid       ");
+                    break;
+            }
+
+            // ✅ Reprint only line 1
+            lcdGotoXY(0, 0);
+            lcdPrint(weatherStr);
+
+            _delay_ms(1000); // 출력 유지 시간
+        }
     }
 
-    _delay_ms(1000); // 1초 간격으로 조도 체크
-  }
+    return 0;
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+    seconds++;
+    if (seconds >= 60)
+    {
+        seconds = 0;
+        minutes++;
+        if (minutes >= 60)
+        {
+            minutes = 0;
+            hours = (hours + 1) % 24;
+        }
+    }
+
+    // ✅ Update timeStr and reprint only line 2
+    snprintf(timeStr, sizeof(timeStr), "%02d:%02d:%02d       ", hours, minutes, seconds);
+    lcdGotoXY(0, 1);
+    lcdPrint(timeStr);
 }

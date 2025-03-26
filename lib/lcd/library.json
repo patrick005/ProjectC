@@ -1,9 +1,7 @@
 {
-    "name": "lcd",
-    "version": "1.0.0",
-    "build": {
-        "srcFilter": [
-            "+<*.c>"
-        ]
-    }
+  "name": "lcd",
+  "version": "1.0.0",
+  "build": {
+    "srcFilter": ["+<*.c>"]
+  }
 }

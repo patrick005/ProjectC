@@ -1,0 +1,8 @@
+{
+    "serialportmonitor.encoding": "utf8",          // 인코딩을 UTF-8로 변경
+    "serialportmonitor.lineEnding": "\n",          // 줄바꿈 설정 (필요 시 \r\n)
+    "serialportmonitor.baudRate": 9600,
+    "files.associations": {
+        "interrupt.h": "c"
+    } // 보드의 Baud Rate와 일치시킴
+}
