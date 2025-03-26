@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "curl.h": "c",
-        "json.h": "c"
+        "json.h": "c",
+        "mysql.h": "c"
     }
 }
