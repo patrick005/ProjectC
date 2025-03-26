@@ -1,3 +1,9 @@
+// RGB LED, CdS, PIR 활용한 코드
+// RGB LED -> 노란색  CdS -> 210 이상이면 OFF 210 미만이면서 PIR에 동작이 감지 될때 10초 동안 ON
+// Timer1만 사용. Timer1은 CTC 모드로 설정되어 100ms마다 인터럽트를 발생 
+// 그 인터럽트 서비스 루틴에서 센서 값 읽기, LED 제어, 타이머 카운터 감소 등을 처리.
+
+
 #define F_CPU 16000000UL
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -96,6 +102,6 @@ int main(void) {
     sei();          // 전역 인터럽트 활성화
 
     while (1) {
-        // 메인 루프는 인터럽트에서 처리합니다.
+        // 메인 루프는 인터럽트에서 처리.
     }
 }
