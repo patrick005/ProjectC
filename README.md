@@ -1,0 +1,41 @@
+# 2025-03-23  
+Create ProjectC repository.  
+Create individual branches for each collaborator.  
+Generate project structure based on the MVC model.  
+
+## File Tree
+
+ProjectC  
+├── CMakeLists.txt  
+├── LICENSE  
+├── README.md  
+├── include  
+├── sql  
+│   └── table.sql  
+├── src  
+│   └── main.c  
+└── web  
+
+---
+
+### 데이터베이스 내 테이블 목록  
+
+| Tables_in_UserInfo |  
+|--------------------|  
+| ID                 |  
+| name               |  
+| UserId             |  
+| password           |  
+| Email              |  
+
+
+ ### 테이블의 속성 
+| CalumName | Type     | Size | UNIQUEable | NULLable |  
+|-----------|----------|------|------------|----------|  
+| name      | varchar  | 50   |            | NOT NULL |  
+| UserId    | varchar  | 50   | UNIQUE     | NOT NULL |  
+| password  | varchar  | 255  |            | NOT NULL |  
+| Email     | varchar  | 255  | UNIQUE     | NOT NULL |  
+| etc       | -        | -    | -          | -        |  
+
+
