@@ -7,13 +7,13 @@
 #include "lcd.h"
 #include "uart0.h"
 
-#define CDS_CHANNEL 0         // PF0
-#define CDS_THRESHOLD 800     // 기준값 (값이 클수록 반응 더 빠름)
+#define CDS_CHANNEL    0       // CdS 센서가 연결된 ADC 채널 (PF0)
+#define CDS_THRESHOLD  210     // 센서 값이 210 이상이면 LED OFF, 미만이면 LED ON
 
 // === ADC 초기화 ===
-void adcInit() {
-    ADMUX = (1 << REFS0); // AVCC 기준 전압, ADC0
-    ADCSRA = (1 << ADEN)  // ADC Enable
+void adcInit(void) {
+    ADMUX = (1 << REFS0); // AVCC 기준 전압 사용
+    ADCSRA = (1 << ADEN)  // ADC 활성화
            | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // 분주비 128
 }
 
@@ -21,36 +21,19 @@ void adcInit() {
 uint16_t readADC(uint8_t channel) {
     ADMUX = (ADMUX & 0xF8) | (channel & 0x07);
     ADCSRA |= (1 << ADSC); // 변환 시작
-    while (ADCSRA & (1 << ADSC));
+    while (ADCSRA & (1 << ADSC)); // 변환 완료 대기
     return ADC;
-}
-
-// === PWM 초기화 (Timer3, PF3/R, PF4/G) ===
-void pwmInit() {
-    // Fast PWM 8bit, non-inverting
-    TCCR3A = (1 << COM3A1) | (1 << COM3B1) | (1 << WGM30);
-    TCCR3B = (1 << WGM32) | (1 << CS31); // 분주비 8
-    DDRF |= (1 << PF3) | (1 << PF4) | (1 << PF5); // PF3~5 출력 설정
-
-    // 파란색 LED 끄기
-    OCR3C = 0;
-    PORTF &= ~(1 << PF5);
-}
-
-// === PWM 값 조절 (노란색, 점점 밝아지도록) ===
-void setYellowPWM(uint8_t brightness) {
-    OCR3A = brightness; // R
-    OCR3B = brightness; // G
-    OCR3C = 0;          // B 끔
 }
 
 int main(void) {
     uart0Init();
     lcdInit();
     adcInit();
-    pwmInit();
 
-    stdin = &INPUT;
+    // PF3: 빨강, PF4: 초록, PF5: 파랑 제어 (RGB LED)
+    DDRF |= (1 << PF3) | (1 << PF4) | (1 << PF5);
+
+    stdin  = &INPUT;
     stdout = &OUTPUT;
 
     lcdGotoXY(0, 0);
@@ -61,21 +44,24 @@ int main(void) {
     while (1) {
         uint16_t adcValue = readADC(CDS_CHANNEL);
 
-        // 밝기 값을 조도에 따라 점점 변하게 수정
-        uint8_t brightness = 0;
+        // --- LED on/off 제어 (Common Anode 가정) ---
         if (adcValue < CDS_THRESHOLD) {
-            brightness = ((CDS_THRESHOLD - adcValue) * 255) / CDS_THRESHOLD; 
+            // 센서값 210 미만이면 LED ON → 노란색 (빨강+초록 켜짐, 파랑 꺼짐)
+            PORTF &= ~(1 << PF3); // 빨강 ON (LOW)
+            PORTF &= ~(1 << PF4); // 초록 ON (LOW)
+            PORTF |=  (1 << PF5); // 파랑 OFF (HIGH)
+        } else {
+            // 센서값 210 이상이면 LED OFF (모든 채널 off)
+            PORTF |= (1 << PF3) | (1 << PF4) | (1 << PF5);
         }
-
-        setYellowPWM(brightness); // 밝기 조절
 
         // LCD 출력
         lcdGotoXY(0, 1);
-        sprintf(buf, "CDS: %u  B: %u", adcValue, brightness);
+        sprintf(buf, "CDS: %u LED: %s", adcValue, (adcValue < CDS_THRESHOLD) ? "ON" : "OFF");
         lcdPrintData(buf, strlen(buf));
 
         // UART 출력
-        printf("CDS ADC: %u, Brightness: %u\r\n", adcValue, brightness);
+        printf("CDS ADC: %u, LED: %s\r\n", adcValue, (adcValue < CDS_THRESHOLD) ? "ON" : "OFF");
 
         _delay_ms(100);
     }
