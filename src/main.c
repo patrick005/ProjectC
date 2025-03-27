@@ -126,23 +126,23 @@ int main() {
                                     char weather_condition[20];  // 날씨 상태를 저장할 변수
 
                                     if (weather_id / 100 == 2) {
-                                        strcpy(weather_condition, "뇌우");
+                                        strcpy(weather_condition, "thunder");
                                     } else if (weather_id / 100 == 3 || weather_id / 100 == 5) {
-                                        strcpy(weather_condition, "비");
+                                        strcpy(weather_condition, "rain");
                                     } else if (weather_id / 100 == 6) {
-                                        strcpy(weather_condition, "눈");
+                                        strcpy(weather_condition, "snow");
                                     } else if (weather_id == 701 || weather_id == 711 || weather_id == 721 || weather_id == 741) {
-                                        strcpy(weather_condition, "안개");
+                                        strcpy(weather_condition, "fog");
                                     } else if (weather_id == 731 || weather_id == 751) {
-                                        strcpy(weather_condition, "황사");
+                                        strcpy(weather_condition, "sand");
                                     } else if (weather_id == 800) {
-                                        strcpy(weather_condition, "맑음");
+                                        strcpy(weather_condition, "sunny");
                                     } else if (weather_id == 801) {
-                                        strcpy(weather_condition, "약간 흐림");
+                                        strcpy(weather_condition, "little cloudy");
                                     } else if (weather_id == 802 || weather_id == 803) {
-                                        strcpy(weather_condition, "흐림");
+                                        strcpy(weather_condition, "cloudy");
                                     } else if (weather_id == 804) {
-                                        strcpy(weather_condition, "많이 흐림");
+                                        strcpy(weather_condition, "very cloudy");
                                     }
 
                                     // 날씨 정보 출력
