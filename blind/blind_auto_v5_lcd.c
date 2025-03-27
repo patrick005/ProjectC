@@ -43,13 +43,13 @@ uint16_t readADC(uint8_t channel) {
 }
 
 void initMotorPins() {
-  DDRA |= 0x0F;
+  DDRC |= 0x0F;
 }
 
 void stepMotor(int direction, int steps, int speed_ms) {
   for (int i = 0; i < steps; i++) {
     motor_step = (motor_step + direction + 8) % 8;
-    PORTA = (PORTA & 0xF0) | (step_sequence[motor_step] & 0x0F);
+    PORTC = (PORTC & 0xF0) | (step_sequence[motor_step] & 0x0F);
     _delay_ms(speed_ms);
   }
 }

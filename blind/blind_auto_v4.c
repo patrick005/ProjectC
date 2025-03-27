@@ -6,24 +6,24 @@
 #include "uart0.h"
 #include "lcd.h"
 
-#define OPEN_THRESHOLD 520
-#define CLOSE_THRESHOLD 480
+#define LIGHT_THRESHOLD_OPEN 600  // 조도 높을 때 여는 임계값
+#define LIGHT_THRESHOLD_CLOSE 400 // 조도 낮을 때 닫는 임계값
 #define OPEN_STEPS 3000
 #define CLOSE_STEPS 3000
 #define STEP_DELAY_MS 1
 
-// 쿨다운 시간 (모터 작동 후 다음 작동까지 대기)
-#define COOLDOWN_TICKS 3000  // 약 3초 대기
-
 typedef enum { OPEN, CLOSED } BlindState;
-typedef enum { MODE_LIGHT_SENSOR, MODE_MANUAL } BlindMode;
-
 BlindState blind_state = CLOSED;
+
+typedef enum {
+  MODE_LIGHT_SENSOR,
+  MODE_MANUAL
+} BlindMode;
+
 BlindMode current_mode = MODE_LIGHT_SENSOR;
 
 uint16_t adc_result = 0;
 uint8_t motor_step = 0;
-uint32_t cooldown_counter = 0;
 
 const uint8_t step_sequence[8] = {
   0b00001000, 0b00001100, 0b00000100, 0b00000110,
@@ -43,13 +43,13 @@ uint16_t readADC(uint8_t channel) {
 }
 
 void initMotorPins() {
-  DDRA |= 0x0F;
+  DDRC |= 0x0F;
 }
 
 void stepMotor(int direction, int steps, int speed_ms) {
   for (int i = 0; i < steps; i++) {
     motor_step = (motor_step + direction + 8) % 8;
-    PORTA = (PORTA & 0xF0) | (step_sequence[motor_step] & 0x0F);
+    PORTC = (PORTC & 0xF0) | (step_sequence[motor_step] & 0x0F);
     _delay_ms(speed_ms);
   }
 }
@@ -66,38 +66,49 @@ char readUART() {
   return UDR0;
 }
 
-void displayMessage(const char* msg) {
-  lcdClear();
-  lcdGotoXY(0, 0);
-  lcdPrint(msg);
+void sendString(const char *str) {
+  while (*str) {
+    while (!(UCSR0A & (1 << UDRE0)));
+    UDR0 = *str++;
+  }
 }
 
-void handleUARTCommand(char cmd) {
-  switch (cmd) {
+void handleUARTCommand(char input) {
+  lcdDataWrite(input);
+
+  switch (input) {
     case 'l':
       current_mode = MODE_LIGHT_SENSOR;
-      displayMessage("Mode: LightSensor");
+      sendString("\r\n[MODE] Light sensor mode selected\r\n");
       break;
+
     case 'm':
       current_mode = MODE_MANUAL;
-      displayMessage("Mode: Manual");
+      sendString("\r\n[MODE] Manual control mode selected\r\n");
       break;
+
     case 'o':
-      if (current_mode == MODE_MANUAL && blind_state == CLOSED) {
+      if (blind_state == CLOSED) {
         stepMotor(1, OPEN_STEPS, STEP_DELAY_MS);
         blind_state = OPEN;
-        displayMessage("Blind OPENED");
+        sendString("\r\nBlind OPENED\r\n");
+      } else {
+        sendString("\r\nBlind is already open\r\n");
       }
       break;
+
     case 'c':
-      if (current_mode == MODE_MANUAL && blind_state == OPEN) {
+      if (blind_state == OPEN) {
         stepMotor(-1, CLOSE_STEPS, STEP_DELAY_MS);
         blind_state = CLOSED;
-        displayMessage("Blind CLOSED");
+        sendString("\r\nBlind CLOSED\r\n");
+      } else {
+        sendString("\r\nBlind is already closed\r\n");
       }
       break;
+
     default:
-      displayMessage("Invalid Command");
+      sendString("\r\n[ERROR] Unknown command. Use l/m/o/c\r\n");
       break;
   }
 }
@@ -107,41 +118,36 @@ int main(void) {
   initMotorPins();
   initUART();
   uart0Init();
-  lcdInit();
 
+  lcdGotoXY(0, 0);
   stdin = &INPUT;
-  displayMessage("Mode: LightSensor");
+
+  sendString("\r\nEnter command: l(light) / m(manual) / o(open) / c(close)\r\n");
 
   while (1) {
+    // UART 명령 입력 확인
     if (UCSR0A & (1 << RXC0)) {
-      char cmd = readUART();
-      handleUARTCommand(cmd);
-      getchar();  // 개행문자 제거
+      char input = readUART();
+      handleUARTCommand(input);
+      getchar(); // 개행문자 제거
     }
 
-    if (cooldown_counter > 0) {
-      cooldown_counter--;
-      _delay_ms(1);
-      continue;
-    }
-
+    // 조도센서 모드
     if (current_mode == MODE_LIGHT_SENSOR) {
       adc_result = readADC(0);
 
-      if (blind_state == CLOSED && adc_result > OPEN_THRESHOLD) {
+      if (adc_result > LIGHT_THRESHOLD_OPEN && blind_state == CLOSED) {
         stepMotor(1, OPEN_STEPS, STEP_DELAY_MS);
         blind_state = OPEN;
-        cooldown_counter = COOLDOWN_TICKS;
-        displayMessage("Opened (light)");
-      }
-      else if (blind_state == OPEN && adc_result < CLOSE_THRESHOLD) {
+        sendString("\r\n[LIGHT] Bright → Blind OPENED\r\n");
+
+      } else if (adc_result < LIGHT_THRESHOLD_CLOSE && blind_state == OPEN) {
         stepMotor(-1, CLOSE_STEPS, STEP_DELAY_MS);
         blind_state = CLOSED;
-        cooldown_counter = COOLDOWN_TICKS;
-        displayMessage("Closed (dark)");
+        sendString("\r\n[LIGHT] Dark → Blind CLOSED\r\n");
       }
-    }
 
-    _delay_ms(1);
+      _delay_ms(500); // 너무 자주 움직이지 않도록 약간의 딜레이
+    }
   }
 }

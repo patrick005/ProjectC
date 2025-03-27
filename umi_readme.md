@@ -19,3 +19,22 @@
 ## 개발 방향 설정
 
 - 예약 시간 기능 및 수동 제어 기능 확장 계획
+
+### 개발 방향 변경
+
+- 시간 예약 기능 삭제 (blind_auto_v4.c)
+   : Light Sensor 모드 / Manual 모드 두가지만 구현
+- LCD 출력 기능 추가 (blind_auto_v5_lcd.c)
+    + Light Sensor 모드에서 히스테리시스 적용해 불필요한 반복 작동 방지
+    + 시리얼 메시지 대신 LCD 출력 적용
+
+- Manual 모드 설명
+    + 사용자 입력에 의해서만 모드 전환 가능 (자동 복귀 없음)
+    + 수동 모드에서 o(열기), c(닫기) 명령 처리
+
+- 두 프로그램 공통 사항
+    + 기본 모드는 Light Sensor 모드
+
+### 모터 제어 포트 변경 (PORTC -> PORTA)
+- blind_auto_v4_final.c
+- blind_auto_v5_lcd_final.c
