@@ -5,6 +5,7 @@
 #include <jansson.h>
 #include <mysql/mysql.h>
 #include <time.h>
+
 #define API_KEY "bd051b188f6b1a86175dbb65aa1f5100" // OpenWeatherMap API 키를 입력하세요.
 #define CITY_ID "1846095" // 세종시 ID (OpenWeatherMap에서 확인 가능)
 #define DB_HOST "localhost"
@@ -14,9 +15,9 @@
 // #define MAX_ITEMS 100  // 최대 저장할 데이터 개수
 
 // // 구조체 정의 (JSON 데이터를 저장할 배열)
-    // char stnId[10];  // 지점 번호
-    // char tm[20];     // 시간
-    // char wt[20];    //날씨
+    char stnId[10];  // 지점 번호
+    char tm[20];     // 시간
+    char wt[20];    //날씨
 
 
 
@@ -121,9 +122,25 @@ int main() {
                             json_t *description = json_object_get(weather_obj, "description");
                             // json_t *icon = json_object_get(weather_obj, "icon");
 
-
+                            // === tm 설정 (현재 시간) ===
+                                time_t t = time(NULL);
+                                struct tm *tm_info = localtime(&t);
+                                strftime(tm, sizeof(tm), "%H:%M:%S", tm_info);
                     
-                            
+                            // // === stnId 설정 (weather_id 사용) ===
+                            // if (json_is_integer(id)) {
+                            //     snprintf(stnId, sizeof(stnId), "%lld", json_integer_value(id));  
+                            // } else {
+                            //     strcpy(stnId, "UNKNOWN");  
+                            // }
+
+                                                            // === wt 설정 (날씨 상태) ===
+                                if (json_is_string(main)) {
+                                    strncpy(wt, json_string_value(main), sizeof(wt) - 1);
+                                    wt[sizeof(wt) - 1] = '\0'; 
+                                } else {
+                                    strcpy(wt, "UNKNOWN");
+                                }
 
                             // 추출된 데이터 출력
                             if (json_is_integer(id) && json_is_string(main) && json_is_string(description))
@@ -132,6 +149,7 @@ int main() {
 
                                 // 날씨 ID로 조건문 처리
                                 if (weather_id / 100 == 2) {
+                                    printf("Time: %d\n",t);
                                     printf("ID: %d\n",weather_id);
                                     printf("날씨: 뇌우\n");
                                 } else if (weather_id / 100 == 3 || weather_id / 100 == 5) {
@@ -161,7 +179,7 @@ int main() {
                                 }
                                 
                                   // 날씨 정보를 MySQL에 삽입
-                                  if (insert_weather_data(conn, tm, stnId, wt) != 0) {
+                                  if (insert_weather_data(conn, tm, weather_id, wt) != 0) {
                                     printf("날씨 데이터 삽입 실패!\n");
                                 } else {
                                     printf("날씨 데이터 삽입 성공\n");

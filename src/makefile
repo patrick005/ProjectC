@@ -1,7 +1,7 @@
 # 변수 설정
 CC = gcc
 CFLAGS = -Wall -g
-LIBS = -lcurl -ljansson
+LIBS = -lcurl -ljansson -lmysqlclient
 
 # 최종 타겟 실행 파일
 TARGET = weather_program
@@ -18,6 +18,8 @@ $(TARGET): $(OBJ)
 
 $(OBJ): $(SRC)
 	$(CC) $(CFLAGS) -c $(SRC)
+
+
 
 # clean 규칙: 빌드된 파일을 삭제
 clean:
