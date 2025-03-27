@@ -3,6 +3,7 @@
     "serialportmonitor.lineEnding": "\n",          // 줄바꿈 설정 (필요 시 \r\n)
     "serialportmonitor.baudRate": 9600,
     "files.associations": {
-        "interrupt.h": "c"
+        "interrupt.h": "c",
+        "delay.h": "c"
     } // 보드의 Baud Rate와 일치시킴
 }
