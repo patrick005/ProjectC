@@ -13,4 +13,11 @@
         "io.h": "c"
     },
     "ros.distro": "humble",
+    
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "C_Cpp.default.includePath": [
+        "/usr/include",
+        "/usr/include/x86_64-linux-gnu"
+    ],
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc"
 }
