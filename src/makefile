@@ -1,29 +1,28 @@
+# 변수 설정
 CC = gcc
 CFLAGS = -Wall -g
+LIBS = -lcurl -ljansson
 
-# 사용되는 라이브러리 설정
-LIBS = -lcurl -ljson-c
-
-# 실행 파일 이름
-TARGET = weather_api
+# 최종 타겟 실행 파일
+TARGET = weather_program
 
 # 소스 파일
-SRC = weather_api.c
+SRC = main.c
 
 # 오브젝트 파일
-OBJ = $(SRC:.c=.o)
+OBJ = main.o
 
-# 기본 목표
-all: $(TARGET)
-
-# 실행 파일 생성 규칙
+# Makefile 규칙
 $(TARGET): $(OBJ)
 	$(CC) $(OBJ) -o $(TARGET) $(LIBS)
 
-# .o 파일 생성 규칙
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+$(OBJ): $(SRC)
+	$(CC) $(CFLAGS) -c $(SRC)
 
-# 실행 파일 삭제 규칙
+# clean 규칙: 빌드된 파일을 삭제
 clean:
 	rm -f $(TARGET) $(OBJ)
+
+# 디버그 모드로 컴파일하려면 `make debug`를 실행
+debug:
+	$(CC) $(CFLAGS) -DDEBUG -o $(TARGET) $(SRC) $(LIBS)

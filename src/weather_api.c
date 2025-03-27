@@ -2,184 +2,193 @@
 #include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
-#include <json-c/json.h>
-#include <time.h>
+#include <jansson.h>
 #include <mysql/mysql.h>
 
-#define API_URL "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst"
-#define SERVICE_KEY "ca9r8VuUVqipZgh0faFDUCDqEJ9aE0Die5Pukgv9HhJgCNzmre3V7cgTmubPrg1TZXhAO5Ue%2Fu13xqtFRDMIxw%3D%3D"
+#define API_KEY "bd051b188f6b1a86175dbb65aa1f5100" // OpenWeatherMap API 키를 입력하세요.
+#define CITY_ID "1846095" // 세종시 ID (OpenWeatherMap에서 확인 가능)
 #define DB_HOST "localhost"
 #define DB_USER "myuser"
 #define DB_PASS "0000"
 #define DB_NAME "WeatherDB"
+// #define MAX_ITEMS 100  // 최대 저장할 데이터 개수
 
+// 구조체 정의 (JSON 데이터를 저장할 배열)
 typedef struct {
-    char data[10000];
-    size_t length;
-} ResponseBuffer;
+    char stnId[10];  // 지점 번호
+    char tm[20];     // 시간
+    char wt[20];    //날씨
+} WeatherData;
 
-// 데이터를 받아서 처리하는 콜백 함수
-size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {
-    ResponseBuffer *response = (ResponseBuffer *)userdata;
-    size_t total_size = size * nmemb;
 
-    if (response->length + total_size < sizeof(response->data) - 1) {
-        strncat(response->data, (char *)ptr, total_size);
-        response->length += total_size;
+// API 응답 데이터를 저장할 구조체
+struct MemoryStruct {
+    char *memory;
+    size_t size;
+};
+
+// API 응답 데이터를 메모리에 저장하는 콜백 함수
+static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+    size_t realsize = size * nmemb;
+    struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+
+    char *ptr = realloc(mem->memory, mem->size + realsize + 1);
+    if (ptr == NULL) {
+        printf("메모리 할당 실패!\n");
+        return 0;
     }
 
-    return total_size;
+    mem->memory = ptr;
+    memcpy(&(mem->memory[mem->size]), contents, realsize);
+    mem->size += realsize;
+    mem->memory[mem->size] = 0;
+
+    return realsize;
 }
 
-// 현재 날짜와 시간을 구하는 함수
-void get_current_date_time(char *base_date, char *base_time) {
-    time_t now;
-    struct tm *tm_info;
-    time(&now);
-    tm_info = localtime(&now);
-
-    // 날짜 (YYYYMMDD)
-    strftime(base_date, 9, "%Y%m%d", tm_info);
-
-    // 최근 3시간 단위의 정각 시간 계산
-    int hour = tm_info->tm_hour;
-    int base_hour = (hour / 3) * 3;
-
-    if (base_hour == 0) {
-        base_hour = 21;
-        time_t yesterday = now - 86400;
-        struct tm *yesterday_info = localtime(&yesterday);
-        strftime(base_date, 9, "%Y%m%d", yesterday_info);
-    }
-
-    snprintf(base_time, 5, "%02d00", base_hour);
-}
-
-// MySQL DB에 데이터 저장 함수
-void save_to_database(const char *fcstDate, const char *fcstTime, const char *category, const char *fcstValue) {
-    MYSQL *conn;
-    char *host = "localhost";
-    char *user = "myuser";
-    char *pass = "0000";
-    char *db = "WeatherDB";
-    int port = 3306;
-    
+// MySQL에 날씨 데이터를 삽입하는 함수
+int insert_weather_data(MYSQL *conn, const char *tm, const char *stnId, const char *wt) {
     char query[512];
-
-    // MySQL 연결
-    conn = mysql_init(NULL);
-    if (conn == NULL) {
-        fprintf(stderr, "MySQL initialization failed\n");
-        return;
-    }
-
-    if (mysql_real_connect(conn,host,user,pass,db,port,NULL,0) == NULL) {
-        fprintf(stderr, "MySQL connection failed: %s\n", mysql_error(conn));
-        mysql_close(conn);
-        return;
-    }
-
-    // 데이터 삽입 쿼리 실행
-    snprintf(query, sizeof(query), 
-             "INSERT INTO weather (fcstDate, fcstTime, category, fcstValue) VALUES ('%s', '%s', '%s', '%s')", 
-             fcstDate, fcstTime, category, fcstValue);
+    snprintf(query, sizeof(query),
+        "INSERT INTO weatherData5 (tm, stnId, wt) VALUES ('%s', '%s', '%s')",
+        tm, stnId, wt);
 
     if (mysql_query(conn, query)) {
-        fprintf(stderr, "MySQL insert error: %s\n", mysql_error(conn));
-    } else {
-        printf("Data inserted into DB: %s %s %s %s\n", fcstDate, fcstTime, category, fcstValue);
+        fprintf(stderr, "INSERT 실패: %s\n", mysql_error(conn));
+        return 1;
     }
-
-    // MySQL 연결 종료
-    mysql_close(conn);
+    return 0;
 }
 
 int main() {
     CURL *curl;
     CURLcode res;
-    char url[1024];
-    ResponseBuffer response = { .data = "", .length = 0 };
+    struct MemoryStruct chunk;
+    chunk.memory = malloc(1);
+    chunk.size = 0;
 
-    char base_date[9];
-    char base_time[5];
-
-    // 현재 날짜와 시간 구하기
-    get_current_date_time(base_date, base_time);
-
-    // API 요청 URL 구성
-    snprintf(url, sizeof(url),
-             "%s?serviceKey=%s&numOfRows=10&pageNo=1&base_date=%s&base_time=%s&nx=66&ny=106&dataType=JSON", 
-             API_URL, SERVICE_KEY, base_date, base_time);
-
-    // curl 초기화
-    curl_global_init(CURL_GLOBAL_DEFAULT);
+    // libcurl 초기화
+    curl_global_init(CURL_GLOBAL_ALL);
     curl = curl_easy_init();
 
+      // MySQL 초기화
+      MYSQL *conn;
+      conn = mysql_init(NULL);
+      if (conn == NULL) {
+          fprintf(stderr, "MySQL 초기화 실패: %s\n", mysql_error(conn));
+          return 1;
+      }
+
+       // MySQL 연결
+       if (mysql_real_connect(conn, DB_HOST, DB_USER, DB_PASS, DB_NAME, 0, NULL, 0) == NULL) {
+        fprintf(stderr, "MySQL 연결 실패: %s\n", mysql_error(conn));
+        return 1;
+    }
+
     if (curl) {
-        // 요청 설정
-        curl_easy_setopt(curl, CURLOPT_URL, url);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+        // API 요청 URL 생성
+        char api_url[256];
+        sprintf(api_url, "http://api.openweathermap.org/data/2.5/weather?id=%s&appid=%s&lang=en", CITY_ID, API_KEY);
 
-        // 요청 실행
+        curl_easy_setopt(curl, CURLOPT_URL, api_url);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+
+        // API 요청 실행
         res = curl_easy_perform(curl);
-
         if (res != CURLE_OK) {
             fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         } else {
-            // 응답 데이터 출력
-            printf("Response: \n%s\n", response.data);
-
             // JSON 파싱
-            struct json_object *parsed_json;
-            struct json_object *response_body;
-            struct json_object *body;
-            struct json_object *items;
+            json_error_t error;
+            json_t *root = json_loads(chunk.memory, 0, &error);
 
-            parsed_json = json_tokener_parse(response.data);
-            if (!json_object_object_get_ex(parsed_json, "response", &response_body)) {
-                printf("Error: 'response' not found in JSON\n");
-                return 1;
+            if (!root) {
+                fprintf(stderr, "JSON 파싱 실패: %s\n", error.text);
+            } else {
+                // 날씨 데이터 추출
+                json_t *weather_array = json_object_get(root, "weather");
+                if (json_is_array(weather_array)) {
+                    size_t array_size = json_array_size(weather_array);
+                    for (size_t i = 0; i < array_size; i++) {
+                        json_t *weather_obj = json_array_get(weather_array, i);
+                        if (json_is_object(weather_obj)) {
+                            // 날씨 ID, 주요 정보, 설명, 아이콘 ID 추출
+                            json_t *id = json_object_get(weather_obj, "id");
+                            json_t *main = json_object_get(weather_obj, "main");
+                            json_t *description = json_object_get(weather_obj, "description");
+                            // json_t *icon = json_object_get(weather_obj, "icon");
+
+
+                    
+                            
+
+                            // 추출된 데이터 출력
+                            if (json_is_integer(id) && json_is_string(main) && json_is_string(description))
+                             {
+                                int weather_id = json_integer_value(id);  // 날씨 ID를 정수로 저장
+
+                                // 날씨 ID로 조건문 처리
+                                if (weather_id / 100 == 2) {
+                                    printf("ID: %d\n",weather_id);
+                                    printf("날씨: 뇌우\n");
+                                } else if (weather_id / 100 == 3 || weather_id / 100 == 5) {
+                                    printf("ID: %d\n",weather_id);
+                                    printf("날씨: 비\n");
+                                } else if (weather_id / 100 == 6) {
+                                    printf("ID: %d\n",weather_id);
+                                    printf("날씨: 눈\n");
+                                } else if (weather_id == 701 || weather_id == 711 || weather_id == 721 || weather_id == 741) {
+                                    printf("ID: %d\n",weather_id);
+                                    printf("날씨: 안개\n");    // 추후 변경
+                                } else if (weather_id  == 731 || weather_id  == 751) {
+                                    printf("ID: %d\n",weather_id);
+                                    printf("날씨: 황사\n");
+                                } else if (weather_id == 800) {
+                                    printf("ID: %d\n",weather_id);
+                                    printf("날씨: 맑음\n");
+                                } else if (weather_id == 801) {
+                                    printf("ID: %d\n",weather_id);
+                                    printf("날씨: 약간 흐림\n");
+                                } else if (weather_id == 802 || weather_id == 803) {
+                                    printf("ID: %d\n",weather_id);
+                                    printf("날씨: 흐림\n");
+                                } else if (weather_id == 804) {
+                                    printf("ID: %d\n",weather_id);
+                                    printf("날씨: 많이 흐림\n");
+                                }
+                                
+                                  // 날씨 정보를 MySQL에 삽입
+                                  if (insert_weather_data(conn, tm, stnId, wt) != 0) {
+                                    printf("날씨 데이터 삽입 실패!\n");
+                                } else {
+                                    printf("날씨 데이터 삽입 성공\n");
+                                // printf("날씨 ID: %lld\n", json_integer_value(id));
+                                // printf("주요 정보: %s\n", json_string_value(main));
+                                // printf("날씨 설명: %s\n", json_string_value(description));
+                                // printf("아이콘 ID: %s\n", json_string_value(icon));
+                            }
+                        }
+                    }
+                }
             }
-            if (!json_object_object_get_ex(response_body, "body", &body)) {
-                printf("Error: 'body' not found in JSON\n");
-                return 1;
-            }
-            if (!json_object_object_get_ex(body, "items", &items)) {
-                printf("Error: 'items' not found in JSON\n");
-                return 1;
-            }
-
-            // items 배열인지 확인
-            if (json_object_get_type(items) != json_type_array) {
-                printf("Error: 'items' is not an array\n");
-                return 1;
-            }
-
-            // 각 아이템(날씨 데이터) 저장
-            for (size_t i = 0; i < json_object_array_length(items); i++) {
-                struct json_object *item = json_object_array_get_idx(items, i);
-                struct json_object *fcstDate, *fcstTime, *category, *fcstValue;
-
-                json_object_object_get_ex(item, "fcstDate", &fcstDate);
-                json_object_object_get_ex(item, "fcstTime", &fcstTime);
-                json_object_object_get_ex(item, "category", &category);
-                json_object_object_get_ex(item, "fcstValue", &fcstValue);
-
-                // MySQL DB에 데이터 저장
-                save_to_database(json_object_get_string(fcstDate),
-                                 json_object_get_string(fcstTime),
-                                 json_object_get_string(category),
-                                 json_object_get_string(fcstValue));
+                json_decref(root);
             }
         }
-
-        // curl 종료
         curl_easy_cleanup(curl);
     }
-
-    // curl 전역 종료
+    // MySQL 연결 종료
+    mysql_close(conn);
+    free(chunk.memory);
     curl_global_cleanup();
-
     return 0;
 }
+
+
+
+
+// https://velog.io/@smh0116/OpenWeatherMap-%EB%82%A0%EC%94%A8-API-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0
+// https://openweathermap.org/price
+// https://openweathermap.org/appid
+// https://openweathermap.org/current#example_JSON
+// https://home.openweathermap.org/api_keys  api값
