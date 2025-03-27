@@ -42,7 +42,9 @@
         "twi_driver.h": "c",
         "string.h": "c",
         "stdlib.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "deprecated.h": "c",
+        "lcdconf.h": "c"
     },
     "ros.distro": "humble",
     "cmake.sourceDirectory": "/home/aa/project1/ProjectC",
