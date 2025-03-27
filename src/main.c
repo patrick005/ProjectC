@@ -114,7 +114,7 @@ int main() {
                             time_t timestamp = json_integer_value(dt);
                             struct tm *time_info = localtime(&timestamp); // 한국 시간으로 변환
                             char formatted_time[20]; // 시간 문자열 저장
-                            strftime(formatted_time, sizeof(formatted_time), "%Y-%m-%d %H:%M:%S", time_info); //시간을 년-월-일-시-분-초로 정의
+                            strftime(formatted_time, sizeof(formatted_time), "%Y-%m-%d %H:%M:%S", time_info); //formatted_time이라는 함수(현재시간)를 년-월-일-시-분-초로 정의
                      
                             // 날씨 상태 출력
                             if (json_is_integer(id)) {
@@ -124,7 +124,7 @@ int main() {
 
                                 // 날씨 상태를 날씨 ID에 따라 설정
                                 char weather_condition[20];  // 날씨 상태를 저장할 변수
-
+                                //weather_condtion에 문자열 저장
                                 if (weather_id / 100 == 2) {
                                     strcpy(weather_condition, "W1"); //폭풍
                                 } else if (weather_id / 100 == 3 || weather_id / 100 == 5) {
@@ -143,6 +143,8 @@ int main() {
                                     strcpy(weather_condition, "W8"); //흐림
                                 } else if (weather_id == 804) {
                                     strcpy(weather_condition, "W9"); //많이 흐림
+                                } else {
+                                    strcpy(weather_condition, "W10"); //표기 오류
                                 }
                                 char weather_id_str[20];  // 충분한 크기의 문자열 배열
                                 sprintf(weather_id_str, "%d", weather_id);  // int weather_id를 문자열로 변환  
