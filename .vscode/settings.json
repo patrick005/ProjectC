@@ -10,7 +10,9 @@
         "string": "c",
         "mysql.h": "c",
         "delay.h": "c",
-        "io.h": "c"
+        "io.h": "c",
+        "libserialport.h": "c",
+        "lcd.h": "c"
     },
     "ros.distro": "humble",
     
