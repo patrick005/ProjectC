@@ -9,3 +9,10 @@ CREATE TABLE weatherData6 (
     wtId VARCHAR(10) NOT NULL,
     wt char(20) NOT NULL
 );
+
+grant all privileges on WeatherDB.* to 
+FLUSH PRIVILEGES;
+
+GRANT SELECT ON mysql.user TO 'myuser'@'%';
+FLUSH PRIVILEGES;
+SELECT * FROM mysql.user WHERE User;
