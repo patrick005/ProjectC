@@ -18,6 +18,9 @@ CREATE USER 'myuser'@'%' IDENTIFIED BY '0000';
 grant all privileges on WeatherDB.* to 'myuser'@'%';
 GRANT SELECT ON mysql.user TO 'myuser'@'%';
 FLUSH PRIVILEGES;
-SELECT * FROM mysql.user WHERE User;
+SELECT * FROM mysql.user WHERE User;a
 
 show columns from weatherData6;
+
+
+drop DATABASE WeatherData6;
