@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <util/delay.h>
 
-char weatherStr[17] = "                ";
-char timeStr[17]    = "                ";
+char weatherStr[17] = {0};  
+char timeStr[17]    = {0};
 
 int main()
 {
@@ -61,7 +61,8 @@ int main()
                 // 총 14글자나 15글자고 YY-MM HH:MM:SS의 형식이면 LCD 둘째 줄에 출력
                 else if ((bufIndex == 14 || bufIndex == 15) && buf[2] == '-' && buf[5] == ' ' && buf[8] == ':' && buf[11] == ':')
                 {
-                    snprintf(timeStr, sizeof(timeStr), "%.16s", buf);  
+                    strncpy(timeStr, buf, 15);
+                    timeStr[15] = '\0';
                     lcdGotoXY(0, 1);
                     lcdPrint(timeStr);
                 }
