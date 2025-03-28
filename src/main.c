@@ -48,8 +48,8 @@ int main()
                         case '4': snprintf(weatherStr, sizeof(weatherStr), "FOGGY         "); break;
                         case '5': snprintf(weatherStr, sizeof(weatherStr), "YELLOW DUST   "); break;
                         case '6': snprintf(weatherStr, sizeof(weatherStr), "SUNNY         "); break;
-                        case '7': snprintf(weatherStr, sizeof(weatherStr), "CLEAR         "); break;
-                        case '8': snprintf(weatherStr, sizeof(weatherStr), "PARTLY CLOUDY "); break;
+                        case '7': snprintf(weatherStr, sizeof(weatherStr), "PARTLY CLOUDY "); break;
+                        case '8': snprintf(weatherStr, sizeof(weatherStr), "CLOUDY        "); break;
                         case '9': snprintf(weatherStr, sizeof(weatherStr), "OVERCAST      "); break;
                         default:  snprintf(weatherStr, sizeof(weatherStr), "Invalid       "); break;
                     }
