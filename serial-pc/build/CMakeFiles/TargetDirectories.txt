@@ -1,0 +1,3 @@
+/home/yujin/ProjectC/serial-pc/build/CMakeFiles/serial_pc.dir
+/home/yujin/ProjectC/serial-pc/build/CMakeFiles/edit_cache.dir
+/home/yujin/ProjectC/serial-pc/build/CMakeFiles/rebuild_cache.dir
