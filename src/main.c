@@ -5,6 +5,7 @@
 #include <jansson.h>
 #include <mysql/mysql.h>
 #include <time.h> // 시간을 처리하기 위한 헤더
+#include <unistd.h> // sleep() 사용을 위한 헤더 추가
 
 #define API_KEY "bd051b188f6b1a86175dbb65aa1f5100" // OpenWeatherMap API 키를 입력하세요.
 #define CITY_ID "1846095" // 세종시 ID (OpenWeatherMap에서 확인 가능)
@@ -56,8 +57,12 @@ int main() {
     CURL *curl;
     CURLcode res;
     struct MemoryStruct chunk;
-    chunk.memory = malloc(1);
+    chunk.memory = malloc(550);
+    free(chunk.memory);  // 이전 메모리 해제
+    chunk.memory = malloc(1);  // 새 메모리 할당
+    
     chunk.size = 0;
+
 
     // libcurl 초기화 
     curl_global_init(CURL_GLOBAL_ALL);
@@ -76,11 +81,17 @@ int main() {
         fprintf(stderr, "MySQL 연결 실패: %s\n", mysql_error(conn));
         return 1;
     }
-
+    while (1) {  // 무한 루프 시작
     if (curl) {
         // API 요청 URL 생성
         char api_url[256];
         sprintf(api_url, "http://api.openweathermap.org/data/2.5/weather?id=%s&appid=%s&lang=en", CITY_ID, API_KEY);
+
+        
+         // 이전 요청의 메모리 초기화
+         free(chunk.memory);  // 이전 메모리 해제
+         chunk.memory = malloc(1);  // 새 메모리 할당
+         chunk.size = 0;
 
         curl_easy_setopt(curl, CURLOPT_URL, api_url);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
@@ -153,7 +164,7 @@ int main() {
 
                                 // 날씨 정보 출력
                                 printf("id: %d\n", weather_id);
-                                printf("날짜-시간: %s\n", formatted_time);
+                                printf("날짜&시간: %s\n", formatted_time);
                                 printf("날씨 상태: %s\n", weather_condition);
                                 
 
@@ -162,6 +173,9 @@ int main() {
                                     printf("날씨 데이터 삽입 실패\n");
                                 } else {
                                     printf("날씨 데이터 삽입 성공\n");
+                                    printf("Initial memory: '%s'\n", chunk.memory);  // 메모리 내용 출력
+printf("Initial size: %zu\n", chunk.size);        // 메모리 크기 출력
+
                                 }
                             }
                         }
@@ -171,6 +185,8 @@ int main() {
             }
         }
         curl_easy_cleanup(curl);
+     }
+        sleep(10);
     }
 
     // MySQL 연결 종료

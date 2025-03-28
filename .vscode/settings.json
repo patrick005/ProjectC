@@ -4,6 +4,7 @@
         "json.h": "c",
         "mysql.h": "c",
         "jansson.h": "c",
-        "jansson_config.h": "c"
+        "jansson_config.h": "c",
+        "time.h": "c"
     }
 }
