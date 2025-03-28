@@ -20,23 +20,25 @@ ProjectC
 
 ### 데이터베이스 내 테이블 목록  
 
-| Tables_in_UserInfo |  
-|--------------------|  
-| ID                 |  
-| name               |  
-| UserId             |  
-| password           |  
-| Email              |  
-
++---------------------+
+| Tables_in_WeatherDB |
++---------------------+
+| weather             |
+| weatherData         |
+| weatherData2        |
+| weatherData3        |
+| weatherData5        |
+| weatherData6 (사용)  |
++---------------------+
 
  ### 테이블의 속성 
-| CalumName | Type     | Size | UNIQUEable | NULLable |  
-|-----------|----------|------|------------|----------|  
-| tm(시간)   | DATETIME |      |            | NOT NULL |  
-|wtId(날씨ID)| varchar  | 10   |            | NOT NULL |  
-| wt(날씨)   | varchar  | 255  |            | NOT NULL |  
-| Email     | varchar  | 255  |            | NOT NULL |  
-
++-------+-------------+------+-----+---------+-------+
+| Field | Type        | Null | Key | Default | Extra |
++-------+-------------+------+-----+---------+-------+
+| tm    | datetime    | NO   |     | NULL    |       |
+| stnId | varchar(10) | NO   |     | NULL    |       |
+| wt    | char(20)    | NO   |     | NULL    |       |
++-------+-------------+------+-----+---------+-------+
 
 
 # 2025-03-25

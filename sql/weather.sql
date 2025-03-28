@@ -19,3 +19,5 @@ grant all privileges on WeatherDB.* to 'myuser'@'%';
 GRANT SELECT ON mysql.user TO 'myuser'@'%';
 FLUSH PRIVILEGES;
 SELECT * FROM mysql.user WHERE User;
+
+show columns from weatherData6;
