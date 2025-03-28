@@ -19,11 +19,6 @@ int main()
 
     DDRE = 0x02; // Rx 입력, Tx 출력
 
-    lcdGotoXY(0, 0);
-    lcdPrint("Waiting...");
-    lcdGotoXY(0, 1);
-    lcdPrint("00:00:00"); //시리얼 통신과 LCD 초기 설정
-
     char buf[16] = {0};
     uint8_t bufIndex = 0; //UART 수신 데이터를 저장할 버퍼
 
