@@ -6,7 +6,7 @@ set(SOURCES
     src/main.c
     )
 
-add_executable(project1 ${SOURCES})
+# add_executable(projectC ${SOURCES})
 target_include_directories(project1 PRIVATE include)
 # target_include_directories(project1 PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src)
 

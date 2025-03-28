@@ -4,6 +4,7 @@
 // 그 인터럽트 서비스 루틴에서 센서 값 읽기, LED 제어, 타이머 카운터 감소 등을 처리.
 // string.h 및 util/delay.h 와 같이 불필요한 부분 주석처리
 // PIR 로직 부분 Low인 줄 알았으나 High여서 해당 사항에 맞게 수정 및 기존 코드 주석처리
+//10초 동안 ON 한다는 로직이 없어 코드 수정) 
 
 #define F_CPU 16000000UL
 #include <avr/io.h>
@@ -15,6 +16,8 @@
 #define PIR_PIN         PD0         // PIR 센서 출력 연결 핀 (이제 감지 시 HIGH)
 #define CDS_CHANNEL     0           // CdS 센서가 연결된 ADC 채널 (PF0)
 #define CDS_THRESHOLD   210         // 조도 임계치: ADC 값이 210 미만이면 LED ON, 이상이면 LED OFF
+
+volatile uint16_t timerCounter = 0; // 수정부분
 
 // === ADC 초기화 ===
 void adcInit(void) {
@@ -56,7 +59,13 @@ ISR(TIMER1_COMPA_vect) {
         PORTF |=  (1 << PF5); // 파랑 채널 OFF (HIGH)
     } else {
         // 조건 미충족 시 LED OFF (모든 채널 HIGH)
-        PORTF |= (1 << PF3) | (1 << PF4) | (1 << PF5);
+        // PORTF |= (1 << PF3) | (1 << PF4) | (1 << PF5); - 주석처리 / 수정부분
+        if (timerCounter >= 100) {                              // timerCounter 로직 추가 수정부분
+            PORTC |= (1 << PC1) | (1 << PC2) | (1 << PC3);      // timerCounter 로직 추가 수정부분
+            timerCounter = 0;                                   // timerCounter 로직 추가 수정부분
+        } else if (timerCounter > 0) {                          // timerCounter 로직 추가 수정부분
+            timerCounter++;                                     // timerCounter 로직 추가 수정부분
+        }     
     }
 
     // UART 출력
