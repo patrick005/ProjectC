@@ -63,10 +63,10 @@ int main()
                     lcdPrint(weatherStr);
                 }
 
-                // 총 8글자고 HH:MM:SS의 형식이면 시간으로 LCD 둘째 줄에 출력
-                else if (bufIndex == 8 && buf[2] == ':' && buf[5] == ':')
+                // 총 14글자나 15글자고 YY-MM HH:MM:SS의 형식이면 LCD 둘째 줄에 출력
+                else if ((bufIndex == 14 || bufIndex == 15) && buf[2] == '-' && buf[5] == ' ' && buf[8] == ':' && buf[11] == ':')
                 {
-                    snprintf(timeStr, sizeof(timeStr), "%s       ", buf);
+                    snprintf(timeStr, sizeof(timeStr), "%.16s", buf);  
                     lcdGotoXY(0, 1);
                     lcdPrint(timeStr);
                 }
