@@ -11,10 +11,10 @@
                 "/home/yj/ProjectC/include",
                 "/home/yj/ProjectC/src",
                 "/home/yj/ProjectC/lib/uart0",
+                "/home/yj/ProjectC/lib/lcd",
                 "/home/yj/ProjectC/lib/at25",
                 "/home/yj/ProjectC/lib/avr-uart",
                 "/home/yj/ProjectC/lib/i2c",
-                "/home/yj/ProjectC/lib/lcd",
                 "/home/yj/ProjectC/lib/sht20",
                 ""
             ],
@@ -24,10 +24,10 @@
                     "/home/yj/ProjectC/include",
                     "/home/yj/ProjectC/src",
                     "/home/yj/ProjectC/lib/uart0",
+                    "/home/yj/ProjectC/lib/lcd",
                     "/home/yj/ProjectC/lib/at25",
                     "/home/yj/ProjectC/lib/avr-uart",
                     "/home/yj/ProjectC/lib/i2c",
-                    "/home/yj/ProjectC/lib/lcd",
                     "/home/yj/ProjectC/lib/sht20",
                     ""
                 ]
