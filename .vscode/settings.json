@@ -1,0 +1,29 @@
+{
+    "files.associations": {
+        "*.py": "python",
+        "*.repos": "yaml",
+        "*.world": "xml",
+        "*.xacro": "xml",
+        "stdio.h": "c",
+        "random": "c",
+        "stdbool.h": "c",
+        "string": "c",
+        "curl.h": "c",
+        "json.h": "c",
+        "mysql.h": "c",
+        "jansson.h": "c",
+        "jansson_config.h": "c",
+        "delay.h": "c",
+        "io.h": "c",
+        "libserialport.h": "c",
+        "lcd.h": "c"
+    },
+    "ros.distro": "humble",
+    
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "C_Cpp.default.includePath": [
+        "/usr/include",
+        "/usr/include/x86_64-linux-gnu"
+    ],
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc"
+}

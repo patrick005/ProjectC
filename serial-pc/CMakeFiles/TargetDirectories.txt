@@ -1,0 +1,3 @@
+/home/yj/ProjectC/serial-pc/CMakeFiles/project1.dir
+/home/yj/ProjectC/serial-pc/CMakeFiles/edit_cache.dir
+/home/yj/ProjectC/serial-pc/CMakeFiles/rebuild_cache.dir

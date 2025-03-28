@@ -1,0 +1,1 @@
+/usr/bin/cc -rdynamic CMakeFiles/project1.dir/src/project1.c.o CMakeFiles/project1.dir/src/main.c.o -o project1   -L/usr/lib/mysql  -Wl,-rpath,/usr/lib/mysql -lmysqlclient 
