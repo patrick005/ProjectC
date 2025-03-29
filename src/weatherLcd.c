@@ -1,6 +1,7 @@
 #include "lcd.h"
 #include "uart0.h"
 #include <avr/interrupt.h>
+#include "lcd.h"
 #include "uart0.h"
 #include <avr/io.h>
 #include <stdio.h>

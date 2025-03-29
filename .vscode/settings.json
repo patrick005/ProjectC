@@ -38,6 +38,7 @@
         "lcd.h": "c",
         "interrupt.h": "c",
         "iom128.h": "c",
+        "libserialport.h": "c",
         "uart0.h": "c",
         "twi_driver.h": "c",
         "string.h": "c",
@@ -47,12 +48,15 @@
         "lcdconf.h": "c"
     },
     "ros.distro": "humble",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "cmake.sourceDirectory": "/home/aa/project1/ProjectC",
     "C_Cpp.errorSquiggles": "disabled",
     "C_Cpp.default.includePath": [
     "/usr/include",
+    "/usr/include/x86_64-linux-gnu",
     "/usr/include/mysql" 
 ]
+    // "C_Cpp.default.compilerPath": "/usr/bin/gcc"
     
     // "makefile.configureOnOpen": false
 }
