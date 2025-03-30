@@ -39,12 +39,26 @@
 | 28일   | 오후  | 송우림   | 하드웨어 제작 및 회로확인 / 1차 병합 파일 확인 / 2차 병합 시작(ledBlind + lcdWeather) |
 | 28일   | 오후  | 정영재   | 하드웨어 제작 및 회로확인 / api를 주기적으로 송수신하는 코드 작성 / lcdWeather 코드 검수 / 2차 병합 시작(ledBlind + lcdWeather) |
 | 28일   | 오후  | 정석준   | db에 저장하기 위한 날씨 데이터 주기적을 api로 받아오기 위한 코드작성 |
-|--|--|--|--|
+|--|--|--|--|  
+| 29일   | ----  | 임윤진   | 코드 병합 및 센서 조율 |
+| 29일   | ----  | 정유진   | 코드 병합 및 디버깅 |
+| 29일   | ----  | 송우림   | 코드 병합 및 디버깅|
+| 29일   | ----  | 정영재   | 회로 병합 |
+| 29일   | ----  | 정석준   | 코드 병합 및 디버깅|  
+|--|--|--|--|  
+| 30일   | ----  | 임윤진   | ppt 제작 및 시스템 아키텍처 생성 |
+| 30일   | ----  | 정유진   | ppt 제작 및 시스템 아키텍처 검토 |
+| 30일   | ----  | 송우림   | ppt 제작 및 시스템 아키텍처 검토 |
+| 30일   | ----  | 정영재   | 영상 촬영 및 시스템 아키텍처 생성 |
+| 30일   | ----  | 정석준   | 영상 촬영 및 전체 코드 검토토 |  
+|--|--|--|--|  
 | 31일   | 오전  | 임윤진   | 1234 |
 | 31일   | 오전  | 정유진   | 1234 |
 | 31일   | 오전  | 송우림   | 1234 |
 | 31일   | 오전  | 정영재   | 1234 |
-| 31일   | 오전  | 정석준   | 1234 |
+| 31일   | 오전  | 정석준   | 1234 |  
+
+---
 
 ## File Tree
 
@@ -52,12 +66,51 @@ ProjectC
 ├── CMakeLists.txt  
 ├── LICENSE  
 ├── README.md  
-├── include  
+├── testCode  
+│   ├── CdsAndLed.c  
+│   ├── blind.c  
+│   ├── cds.c  
+│   ├── ledpir.c  
+│   ├── ledpir_blind.c  
+│   ├── libserialporttest.c  
+│   └── pinChange.c  
+├── lib  
+│   ├── at25  
+│   │   ├── at25160.c  
+│   │   └── at25160.h  
+│   ├── avr-uart  
+│   │   ├── uart.c  
+│   │   └── uart.h  
+│   ├── i2c  
+│   │   ├── i2c_lcd.c  
+│   │   └── i2c_lcd.h  
+│   ├── lcd  
+│   │   ├── lcd.c  
+│   │   ├── lcd.h  
+│   │   ├── lcdconf.h  
+│   │   └── library.json  
+│   ├── sht20  
+│   │   ├── SH2x.c  
+│   │   ├── SHT2x.h  
+│   │   ├── TWI_driver.c  
+│   │   └── TWI_driver.h  
+│   ├── time_sender  
+│   ├── time_sender.c  
+│   ├── uart0  
+│   │   ├── uart0.c  
+│   │   └── uart0.h  
+│   ├── weather_sender  
+│   └── weather_sender.c  
+├── platformio.ini  
+├── serial-pc  
+│   ├── CMakeFiles  
+│   ├── CMakeLists.txt  
+│   └── Makefile  
 ├── sql  
-│   └── table.sql  
-├── src  
-│   └── main.c  
-└── web  
+│   └── weather.sql  
+└── src  
+     ├── main  
+     └── main.c  
 
 ---
 
