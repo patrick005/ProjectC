@@ -16,7 +16,9 @@
         "delay.h": "c",
         "io.h": "c",
         "libserialport.h": "c",
-        "lcd.h": "c"
+        "lcd.h": "c",
+        "uart0.h": "c",
+        "main_yj": "cpp"
     },
     "ros.distro": "humble",
     
