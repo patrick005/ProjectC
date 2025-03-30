@@ -32,6 +32,7 @@ int main(void)
         return 1;
     }
 
+    //시리얼 포트의 통신 파라미터를 설정하는 기본적인 초기화 과정
     struct termios tty;
     memset(&tty, 0, sizeof tty);
     if (tcgetattr(serial, &tty) != 0) {
@@ -94,3 +95,5 @@ int main(void)
     close(serial);
     return 0;
 }
+
+//gcc weather_sender.c -o weather_sender `mysql_config --cflags --libs` --백틱으로 쓸것

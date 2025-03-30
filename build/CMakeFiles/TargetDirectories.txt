@@ -1,0 +1,2 @@
+/home/yj/ProjectC/build/CMakeFiles/edit_cache.dir
+/home/yj/ProjectC/build/CMakeFiles/rebuild_cache.dir
