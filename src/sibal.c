@@ -102,6 +102,7 @@ int main() {
         if (res != CURLE_OK) {
             fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         } else {
+
             // JSON 파싱
 
                 
@@ -109,8 +110,8 @@ int main() {
                 json_t *root = json_loads(chunk.memory, 0, &error);
             if (!root) {
                 fprintf(stderr, "JSON 파싱 실패: %s\n", error.text);
-            } 
-            else 
+            }
+            else
             {
                 // 날씨 데이터 추출
                 json_t *weather_array = json_object_get(root, "weather");

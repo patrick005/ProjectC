@@ -7,7 +7,7 @@
 #include <time.h> // 시간을 처리하기 위한 헤더
 #include <unistd.h> // sleep() 사용을 위한 헤더 추가
 
-#define API_KEY "bd051b188f6b1a86175dbb65aa1f5100" // OpenWeatherMap API 키를 입력하세요.
+#define API_KEY "8bc16cfe5d6481881465b22781d0a0ae" // OpenWeatherMap API 키를 입력하세요.
 #define CITY_ID "1846095" // 세종시 ID (OpenWeatherMap에서 확인 가능)
 //MYSQL에 사용하는 정의
 #define DB_HOST "localhost"
@@ -194,7 +194,7 @@ int main() {
             }
         }
      }
-    sleep(20);
+    sleep(3600);
     
     }
     // MySQL 연결 종료

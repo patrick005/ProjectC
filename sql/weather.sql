@@ -21,6 +21,6 @@ FLUSH PRIVILEGES;
 SELECT * FROM mysql.user WHERE User;a
 
 show columns from weatherData6;
-
+SELECT * FROM weatherData6;
 
 drop DATABASE WeatherData6;
