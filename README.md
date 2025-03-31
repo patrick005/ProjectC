@@ -136,7 +136,7 @@ ProjectC
 
 ---
 
-###
-[결과물](https://youtu.be/QChKDJOia1w)
-[구글슬라이드](https://www.miricanvas.com/v/14epd6t)
+
+[결과물](https://youtu.be/QChKDJOia1w)  
+[구글슬라이드](https://www.miricanvas.com/v/14epd6t)  
 
