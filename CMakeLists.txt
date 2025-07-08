@@ -16,5 +16,5 @@
 
 # # message(STATUS "Using compiler: ${CMAKE_C_COMPILER}")
 # # message(STATUS "Include directories: /usr/include/mysql")
-# # message(STATUS "Library directories: /usr/lib/mysql")
+# # message(STATUS "`Library directories: /usr/lib/mysql")
 # # 컴파일 디버그용 메시지 출력
